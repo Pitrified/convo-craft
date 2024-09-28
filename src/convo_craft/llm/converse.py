@@ -76,7 +76,7 @@ class ConversationGenerator:
         self.model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
         self.structured_llm = self.model.with_structured_output(Conversation)
 
-    def generate(self, topic: str) -> Conversation:
+    def invoke(self, topic: str) -> Conversation:
         """Generate a conversation."""
         conversation_value = conversation_prompt.invoke(
             {
