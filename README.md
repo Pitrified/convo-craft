@@ -37,7 +37,6 @@ poetry run pytest
 
 or use the VSCode interface.
 
-
 ## IDEAs
 
 1. Generate conversations in target language,
@@ -54,3 +53,4 @@ or use the VSCode interface.
 ## TODOs
 
 - [ ] Add test coverage report
+- [ ] Add more conversation samples in different languages and for different levels of understanding
