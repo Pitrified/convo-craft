@@ -1,5 +1,8 @@
 """An app for the Convo Craft project."""
 
+from dataclasses import dataclass
+import random
+
 from loguru import logger as lg
 
 from convo_craft.llm.conversation_generator import (
@@ -8,8 +11,10 @@ from convo_craft.llm.conversation_generator import (
     ConversationGenerator,
     ConversationTurn,
 )
+from convo_craft.llm.paragraph_splitter import ParagraphSplitter
 from convo_craft.llm.topic_picker import OLD_TOPICS, TopicsPicker
 from convo_craft.llm.translator import Translator
+from convo_craft.text.split_sentence import SentenceSplitter
 
 LANGUAGE_OPTIONS = ["Brazilian Portuguese"]
 
@@ -32,10 +37,14 @@ class App:
         #     ? and just initializing it when the actual conversation starts
         self.set_conversation([])
 
+    # language
+
     def set_language_index(self, language_index: int) -> None:
         """Set the language index."""
         self.language_index = language_index
         self.language = self.language_options[self.language_index]
+
+    # topics
 
     def set_topics(self, topics: list[str]) -> None:
         """Set the topics."""
@@ -69,6 +78,8 @@ class App:
         res = tp.invoke(OLD_TOPICS)
         self.set_topics(res.topics)
 
+    # conversation
+
     def set_conversation(self, conversation: list[ConversationTurn]) -> None:
         """Set the conversation."""
         self.conversation = conversation
@@ -82,9 +93,9 @@ class App:
         lg.info(f"Setting conversation step: {conversation_step}")
         self.conversation_step = conversation_step
         if self.conversation_step is not None:
-            self.current_step_translation = self.translate(
-                self.conversation[self.conversation_step].content
-            )
+            current_step = self.conversation[self.conversation_step].content
+            self.current_step_translation = self.translate(current_step)
+            self.words = AppWords(current_step)
 
     def next_conversation_step(self) -> None:
         """Go to the next conversation step."""
@@ -92,16 +103,6 @@ class App:
             self.set_conversation_step(0)
         else:
             self.set_conversation_step(self.conversation_step + 1)
-
-    def translate(self, text: str) -> str:
-        """Translate the text."""
-        lg.debug(f"Translating: {text}")
-        t = Translator(
-            source_language=self.language,
-            target_language="English",
-        )
-        res = t.invoke(text)
-        return res.target_text
 
     def generate_conversation(self) -> None:
         """Generate a conversation."""
@@ -117,3 +118,75 @@ class App:
         conv = c.invoke(self.topic)
         lg.debug(f"{conv=}")
         self.set_conversation(conv.turns)
+
+    # utils
+
+    def translate(self, text: str) -> str:
+        """Translate the text."""
+        lg.debug(f"Translating: {text}")
+        t = Translator(
+            source_language=self.language,
+            target_language="English",
+        )
+        res = t.invoke(text)
+        return res.target_text
+
+
+@dataclass
+class WordGuess:
+    word: str
+    state: str
+
+
+class AppWords:
+    """The words related to the current step in the conversation."""
+
+    def __init__(self, current_step: str) -> None:
+        """Initialize the app words."""
+        # setup tools
+        self.para_splitter = ParagraphSplitter()
+        self.sent_splitter = SentenceSplitter()
+        # split the paragraph into sentences and words
+        self.paragraph = current_step
+        self.para_split_result = self.para_splitter.invoke(self.paragraph)
+        self.sentences = self.para_split_result.portions
+        self.sents_words: list[list[WordGuess]] = []
+        for sent in self.sentences:
+            words = self.sent_splitter.invoke(sent)
+            w_guess = [WordGuess(word=word, state="normal") for word in words]
+            self.sents_words.append(w_guess)
+        # init the user guess
+        self.current_sent = 0
+        self.current_word = 0
+        # shuffle the words
+        self.shuffle_words()
+        # set the done flag
+        self.done = False
+
+    def shuffle_words(self) -> None:
+        """Shuffle the words."""
+        self.words_shuffled = []
+        for sent_words in self.sents_words:
+            words_shuffled = sent_words.copy()
+            random.shuffle(words_shuffled)
+            self.words_shuffled.append(words_shuffled)
+
+    def receive_guess(self, guess: str) -> bool:
+        """Receive a guess."""
+        # grab the current word
+        current_word = self.sents_words[self.current_sent][self.current_word]
+        # check if the guess is wrong
+        if not guess == current_word.word:
+            current_word.state = "wrong"
+            return False
+        # mark the word as correct
+        current_word.state = "correct"
+        # move to the next word
+        self.current_word += 1
+        if self.current_word == len(self.sents_words[self.current_sent]):
+            self.current_sent += 1
+            self.current_word = 0
+        # check if done
+        if self.current_sent == len(self.sents_words):
+            self.done = True
+        return True
