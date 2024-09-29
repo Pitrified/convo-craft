@@ -5,6 +5,7 @@ from enum import Enum
 
 from langchain_core.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
 from langchain_openai import ChatOpenAI
+from loguru import logger as lg
 from pydantic import BaseModel, Field
 
 
@@ -36,9 +37,11 @@ conversation_template = """Write a conversation in {language} between two person
 that should be used to teach the user the language.
 The conversation should be about the following topic: "{topic}".
 Assume that the user has an {understanding_level} level of understanding of the language.
-The conversation should last about {num_msg} messages in total, with each message being about 2-3 sentences long.
+The conversation should last about {num_messages} messages in total, \
+with each message being about {num_sentences} sentences long.
 """
 difficulty_template = """This is an example of a conversation in {language} between two persons, \
+about the topic "{topic_sample}", \
 of the appropriate difficulty level for the user, which is {understanding_level}:
 {conversation_sample}
 """
@@ -49,6 +52,7 @@ conversation_prompt = ChatPromptTemplate(
     ],
 )
 
+TOPIC_SAMPLE = "A conversation about ordering food in a restaurant."
 CONVERSATION_SAMPLE = """Oi! Você já decidiu o que vai pedir no restaurante?
 Oi! Eu estou pensando em pedir uma pizza. E você, o que vai escolher?
 Eu estou em dúvida entre o hambúrguer e a salada. Você já experimentou o hambúrguer daqui?
@@ -68,8 +72,10 @@ class ConversationGenerator:
     """Generate a conversation."""
 
     language: str
-    num_msg: int
+    num_messages: int
+    num_sentences: int
     understanding_level: str
+    topic_sample: str
     conversation_sample: str
 
     def __post_init__(self) -> None:
@@ -85,10 +91,13 @@ class ConversationGenerator:
                 "language": self.language,
                 "topic": topic,
                 "understanding_level": self.understanding_level,
-                "num_msg": self.num_msg,
+                "num_messages": self.num_messages,
+                "num_sentences": self.num_sentences,
+                "topic_sample": self.topic_sample,
                 "conversation_sample": self.conversation_sample,
             }
         )
+        lg.debug(f"{conversation_value=}")
         output = self.structured_llm.invoke(conversation_value)
         if not isinstance(output, ConversationGeneratorResult):
             raise ValueError(f"Invalid output: {output}")
