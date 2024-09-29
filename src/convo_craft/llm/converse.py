@@ -22,7 +22,7 @@ class ConversationTurn(BaseModel):
     content: str = Field(description="The content of the message")
 
 
-class Conversation(BaseModel):
+class ConversationGeneratorResult(BaseModel):
     """A conversation with a consistent plot or theme.
 
     The roles in the turns should alternate between two speakers, identified as
@@ -74,9 +74,11 @@ class ConversationGenerator:
 
     def __post_init__(self) -> None:
         self.model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-        self.structured_llm = self.model.with_structured_output(Conversation)
+        self.structured_llm = self.model.with_structured_output(
+            ConversationGeneratorResult
+        )
 
-    def invoke(self, topic: str) -> Conversation:
+    def invoke(self, topic: str) -> ConversationGeneratorResult:
         """Generate a conversation."""
         conversation_value = conversation_prompt.invoke(
             {
@@ -88,6 +90,6 @@ class ConversationGenerator:
             }
         )
         output = self.structured_llm.invoke(conversation_value)
-        if not isinstance(output, Conversation):
+        if not isinstance(output, ConversationGeneratorResult):
             raise ValueError(f"Invalid output: {output}")
         return output

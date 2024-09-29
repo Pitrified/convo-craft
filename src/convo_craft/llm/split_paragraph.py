@@ -7,7 +7,7 @@ from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
 
-class SplitParagraphResult(BaseModel):
+class ParagraphSplitterResult(BaseModel):
     """The result of splitting a paragraph.
 
     The original paragraph should be split into portions without changing the text,
@@ -35,12 +35,12 @@ class ParagraphSplitter:
     def __post_init__(self):
         """Initialize the paragraph splitter."""
         self.model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-        self.structured_llm = self.model.with_structured_output(SplitParagraphResult)
+        self.structured_llm = self.model.with_structured_output(ParagraphSplitterResult)
 
-    def invoke(self, paragraph: str) -> SplitParagraphResult:
+    def invoke(self, paragraph: str) -> ParagraphSplitterResult:
         """Split the paragraph."""
         split_paragraph_value = split_paragraph_prompt.invoke({"paragraph": paragraph})
         output = self.structured_llm.invoke(split_paragraph_value)
-        if not isinstance(output, SplitParagraphResult):
+        if not isinstance(output, ParagraphSplitterResult):
             raise ValueError(f"Unexpected output type: {type(output)}")
         return output

@@ -8,7 +8,7 @@ from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
 
-class TopicsResult(BaseModel):
+class TopicsPickerResult(BaseModel):
     """Options for new topics for a conversation.
 
     Each topic should be a sentence describing the topic.
@@ -41,7 +41,7 @@ OLD_TOPICS = [
 
 
 @dataclass
-class TopicPicker:
+class TopicsPicker:
     """A topic picker."""
 
     language: str
@@ -50,9 +50,9 @@ class TopicPicker:
     def __post_init__(self):
         """Initialize the topic picker."""
         self.model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-        self.structured_llm = self.model.with_structured_output(TopicsResult)
+        self.structured_llm = self.model.with_structured_output(TopicsPickerResult)
 
-    def invoke(self, old_topics: list[str]) -> TopicsResult:
+    def invoke(self, old_topics: list[str]) -> TopicsPickerResult:
         """Pick a topic."""
         old_topics_str = "\n".join(old_topics)
         topic_picker_value = topic_picker_prompt.invoke(
@@ -63,6 +63,6 @@ class TopicPicker:
             }
         )
         output = self.structured_llm.invoke(topic_picker_value)
-        if not isinstance(output, TopicsResult):
+        if not isinstance(output, TopicsPickerResult):
             raise ValueError(f"Unexpected output type: {type(output)}")
         return output

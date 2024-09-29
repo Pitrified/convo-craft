@@ -54,6 +54,7 @@ or use the VSCode interface.
 
 ## TODOs
 
+- [ ] SentenceSplitter should return a `SentenceSplitResult` pydantic model object
 - [ ] Move the creation of a structured_llm to a separate class
 - [ ] Uniform the naming convention for `BlahResult` or `BlahResponse`, with the matching `BlahGenerator` of `Blaher`
 - [ ] Build a `Generator` abstract class to move the `invoke` common logic to a single place

@@ -7,7 +7,7 @@ from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
 
-class TranslationResult(BaseModel):
+class TranslatorResult(BaseModel):
     """The result of a translation."""
 
     target_text: str = Field(description="The translated text")
@@ -32,9 +32,9 @@ class Translator:
     def __post_init__(self):
         """Initialize the translator."""
         self.model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-        self.structured_llm = self.model.with_structured_output(TranslationResult)
+        self.structured_llm = self.model.with_structured_output(TranslatorResult)
 
-    def invoke(self, source_text: str) -> TranslationResult:
+    def invoke(self, source_text: str) -> TranslatorResult:
         """Translate the text."""
         translation_value = translation_prompt.invoke(
             {
@@ -44,6 +44,6 @@ class Translator:
             }
         )
         output = self.structured_llm.invoke(translation_value)
-        if not isinstance(output, TranslationResult):
+        if not isinstance(output, TranslatorResult):
             raise ValueError(f"Unexpected output type: {type(output)}")
         return output
