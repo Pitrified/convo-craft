@@ -89,6 +89,8 @@ class AppConversation:
         self.setup_tools()
         # generate the conversation
         self.generate_conversation()
+        # init the conversation state
+        self.done = False
 
     def setup_tools(self) -> None:
         self.cg = ConversationGenerator(
@@ -122,7 +124,17 @@ class AppConversation:
 
     def next_conversation_step(self) -> None:
         """Go to the next conversation step."""
+        if self.conversation_step == len(self.conversation) - 1:
+            lg.info("Conversation is done")
+            self.done = True
+            return
         self.set_conversation_step(self.conversation_step + 1)
+
+    def receive_guess(self, shuf_si: int, shuf_wi: int) -> None:
+        """Receive a guess."""
+        self.words.receive_guess(shuf_si, shuf_wi)
+        if self.words.done:
+            self.next_conversation_step()
 
 
 @dataclass
@@ -158,19 +170,23 @@ class AppWords:
 
     def shuffle_words(self) -> None:
         """Shuffle the words."""
-        self.words_shuffled = []
+        self.words_shuffled: list[list[AppWordGuess]] = []
         for sent_words in self.sents_words:
             words_shuffled = sent_words.copy()
             random.shuffle(words_shuffled)
             self.words_shuffled.append(words_shuffled)
 
-    def receive_guess(self, guess: str) -> bool:
+    def receive_guess(self, shuf_si: int, shuf_wi: int) -> bool:
         """Receive a guess."""
+        # grab the guessed word from the shuffled list
+        guess = self.words_shuffled[shuf_si][shuf_wi]
+        lg.debug(f"Received guess: {guess} at {shuf_si}, {shuf_wi}")
         # grab the current word
         current_word = self.sents_words[self.current_sent][self.current_word]
         # check if the guess is wrong
-        if not guess == current_word.word:
-            current_word.state = "wrong"
+        if not guess.word == current_word.word:
+            guess.state = "wrong"
+            lg.debug(f"Wrong guess: {guess} != {current_word}")
             return False
         # mark the word as correct
         current_word.state = "correct"
@@ -181,7 +197,9 @@ class AppWords:
             self.current_word = 0
         # check if done
         if self.current_sent == len(self.sents_words):
+            lg.success("All words guessed correctly")
             self.done = True
+        lg.debug(f"Right guess: {guess} == {current_word}")
         return True
 
 
@@ -208,3 +226,9 @@ class App:
             topic=self.topic.topic,
             language=self.language,
         )
+
+    def receive_guess(self, shuf_si: int, shuf_wi: int) -> None:
+        """Receive a guess."""
+        self.conversation.receive_guess(shuf_si, shuf_wi)
+        if self.conversation.done:
+            lg.success("Conversation is done")

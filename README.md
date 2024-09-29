@@ -64,18 +64,27 @@ streamlit run webapp/streamlit/st_app.py
 
 ### General
 
+- [ ] The difficulty template conversation can be written once in english
 - [ ] SentenceSplitter should return a `SentenceSplitResult` pydantic model object
-- [ ] Move the creation of a structured_llm to a separate class
-- [ ] Uniform the naming convention for `BlahResult` or `BlahResponse`, with the matching `BlahGenerator` of `Blaher`
+- [ ] Move the creation of a `structured_llm` to a separate class
+- [x] Uniform the naming convention for `BlahResult` or `BlahResponse`, with the matching `BlahGenerator` of `Blaher`
 - [ ] Build a `Generator` abstract class to move the `invoke` common logic to a single place
+    Nah, it's not worth it, the `invoke` method must return a `BlahResult` object
+    of the proper type, its a mess
 - [ ] Wrap the template and prompts in a `BlahPrompt` class
+    Which makes it easier to change them for locale or difficulty
 - [ ] Add more conversation samples in different languages and for different levels of understanding
 - [ ] Add test coverage report
 
 ### Web App
 
+- [ ] Show the written turn as you select the options
+- [ ] Add option to toggle showing the original as a hint in the sidebar
+- [ ] Reset the conversation at the end of the conversation
+    - [ ] Add an option to continue instead
 - [ ] Develop the user input step
 - [ ] Add a field to input the `OPENAI_API_KEY`
 - [ ] Add a `Difficulty` picker to the web app
 - [ ] Add a `Language` picker to the web app
 - [ ] Add a `Topic` picker to the web app
+- [ ] Count points for each correct answer
