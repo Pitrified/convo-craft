@@ -26,52 +26,46 @@ def init_state() -> None:
 
 def setup_language() -> None:
     """Set up the language."""
-    a = ss.app
+    a: App = ss.app
     st.sidebar.subheader("Language")
     lang = a.language
-    st.sidebar.write(lang)
+    st.sidebar.write(lang.language)
 
 
 def setup_topics() -> None:
     """Set up the topics."""
-    a = ss.app
     st.sidebar.subheader("Topics")
-    topics = a.topics
-    if len(topics) == 0:
-        a.generate_topics()
     choose_topic()
 
 
 def choose_topic() -> None:
     """Choose a topic."""
-    a = ss.app
-    lg.debug(f'current topic index: "{a.topic_index}"')
+    a: App = ss.app
+    at = a.topic
+    lg.debug(f'current topic index: "{at.topic_index}"')
     st.sidebar.selectbox(
         "Choose a topic",
-        a.topics,
+        at.topics,
         key="topic",
-        index=a.topic_index,
+        index=at.topic_index,
         on_change=choose_topic_cb,
     )
-    if a.topic_index is None:
+    if at.topic_index is None:
         st.write("Please choose a topic")
         st.stop()
-    st.write(f'Chosen topic: "{a.topic}"')
+    st.write(f'Chosen topic: "{at.topic}"')
 
 
 def choose_topic_cb() -> None:
     """Choose a topic callback."""
     topic = ss.topic
     lg.info(f"Choosing topic {topic}")
-    a = ss.app
-    a.set_topic(topic)
+    a: App = ss.app
+    a.set_topic_by_value(topic)
 
 
 def setup_conversation() -> None:
     """Set up the conversation."""
-    a = ss.app
-    if len(a.conversation) == 0:
-        a.generate_conversation()
     # st.write(a.conversation)
     show_done_conv()
     show_current_turn()
@@ -80,20 +74,22 @@ def setup_conversation() -> None:
 
 def show_done_conv() -> None:
     """Show the done conversation."""
-    a = ss.app
+    a: App = ss.app
+    ac = a.conversation
     st.subheader("Conversation")
-    for it, turn in enumerate(a.conversation):
-        if it >= a.conversation_step:
+    for it, turn in enumerate(ac.conversation):
+        if it >= ac.conversation_step:
             break
         st.write(turn.content)
 
 
 def show_current_turn() -> None:
     """Show the current turn."""
-    a = ss.app
+    a: App = ss.app
+    ac = a.conversation
     st.subheader("Current Turn")
-    st.write(a.conversation[a.conversation_step].content)
-    st.write(a.current_step_translation)
+    st.write(ac.conversation[ac.conversation_step].content)
+    st.write(ac.current_step_translation.target_text)
 
 
 def show_next_turn() -> None:
@@ -106,8 +102,10 @@ def show_next_turn() -> None:
 
 def show_next_turn_cb() -> None:
     """Show the next turn callback."""
+    # FIXME implement actual logic for the next turn
     a: App = ss.app
-    a.next_conversation_step()
+    ac = a.conversation
+    ac.next_conversation_step()
 
 
 def app() -> None:
