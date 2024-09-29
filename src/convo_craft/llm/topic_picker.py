@@ -17,7 +17,7 @@ class TopicsPickerResult(BaseModel):
     topics: list[str] = Field(description="The list of topics")
 
 
-topic_picker_template = """Generate a list of topics for a conversation in {language} \
+topic_picker_template = """Generate a list of topics for a conversation \
 that should be used to teach the user the language.
 Assume that the user has an {understanding_level} level of understanding of the language.
 
@@ -44,7 +44,6 @@ OLD_TOPICS = [
 class TopicsPicker:
     """A topic picker."""
 
-    language: str
     understanding_level: str
 
     def __post_init__(self):
@@ -57,7 +56,6 @@ class TopicsPicker:
         old_topics_str = "\n".join(old_topics)
         topic_picker_value = topic_picker_prompt.invoke(
             {
-                "language": self.language,
                 "understanding_level": self.understanding_level,
                 "old_topics": old_topics_str,
             }
