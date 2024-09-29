@@ -39,6 +39,8 @@ or use the VSCode interface.
 
 ## IDEAs
 
+1. Generate a topic list.
+    1. Save it somewhere.
 1. Generate conversations in target language,
    two people talking to each other,
    about one sentence each.
@@ -52,5 +54,9 @@ or use the VSCode interface.
 
 ## TODOs
 
-- [ ] Add test coverage report
+- [ ] Move the creation of a structured_llm to a separate class
+- [ ] Uniform the naming convention for `BlahResult` or `BlahResponse`, with the matching `BlahGenerator` of `Blaher`
+- [ ] Build a `Generator` abstract class to move the `invoke` common logic to a single place
+- [ ] Wrap the template and prompts in a `BlahPrompt` class
 - [ ] Add more conversation samples in different languages and for different levels of understanding
+- [ ] Add test coverage report
