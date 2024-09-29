@@ -37,6 +37,14 @@ poetry run pytest
 
 or use the VSCode interface.
 
+## Web App
+
+To run the web app, use the following command:
+
+```bash
+streamlit run webapp/streamlit/st_app.py
+```
+
 ## IDEAs
 
 1. Generate a topic list.
@@ -54,6 +62,8 @@ or use the VSCode interface.
 
 ## TODOs
 
+### General
+
 - [ ] SentenceSplitter should return a `SentenceSplitResult` pydantic model object
 - [ ] Move the creation of a structured_llm to a separate class
 - [ ] Uniform the naming convention for `BlahResult` or `BlahResponse`, with the matching `BlahGenerator` of `Blaher`
@@ -61,3 +71,11 @@ or use the VSCode interface.
 - [ ] Wrap the template and prompts in a `BlahPrompt` class
 - [ ] Add more conversation samples in different languages and for different levels of understanding
 - [ ] Add test coverage report
+
+### Web App
+
+- [ ] Develop the user input step
+- [ ] Add a field to input the `OPENAI_API_KEY`
+- [ ] Add a `Difficulty` picker to the web app
+- [ ] Add a `Language` picker to the web app
+- [ ] Add a `Topic` picker to the web app
