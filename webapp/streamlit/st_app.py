@@ -2,6 +2,7 @@
 
 from functools import partial
 from itertools import cycle
+import os
 
 from loguru import logger as lg
 import streamlit as st
@@ -16,15 +17,33 @@ def setup_app() -> None:
     st.set_page_config(page_title="Convo Craft", page_icon="🗣️")
     st.sidebar.title("Convo Craft")
 
-    init_state()
+    load_api_key()
+
+    init_app_state()
 
 
-def init_state() -> None:
+def init_app_state() -> None:
     """Initialize the app state."""
     if "app" not in ss:
         lg.info("Initializing app state")
         ss.app = App()
     lg.info("App state initialized")
+
+
+def load_api_key() -> None:
+    """Load the API key."""
+    st.sidebar.text_input(
+        "OpenAI API key",
+        key="api_key",
+        type="password",
+        on_change=load_api_key_cb,
+    )
+
+
+def load_api_key_cb() -> None:
+    """Load the API key callback."""
+    lg.info("Loading the API key")
+    os.environ["OPENAI_API_KEY"] = ss.api_key
 
 
 def get_app() -> App:
