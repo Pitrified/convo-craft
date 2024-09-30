@@ -64,26 +64,28 @@ streamlit run webapp/streamlit/st_app.py
 
 ### General
 
-- [ ] The difficulty template conversation can be written once in english
+- [ ] Change the name of all `convert_to_secret_str` to `v1`
 - [ ] SentenceSplitter should return a `SentenceSplitResult` pydantic model object
-- [ ] Move the creation of a `structured_llm` to a separate class
+- [ ] The difficulty template conversation can be written once in english
+- [ ] Add more conversation samples in different languages and for different levels of understanding
+    Just once in english
 - [x] Uniform the naming convention for `BlahResult` or `BlahResponse`, with the matching `BlahGenerator` of `Blaher`
+- [ ] Wrap the template and prompts in a `BlahPrompt` class
+    Which makes it easier to change them for locale or difficulty
+- [ ] Add test coverage report
+- [ ] Move the creation of a `structured_llm` to a separate class
 - [ ] Build a `Generator` abstract class to move the `invoke` common logic to a single place
     Nah, it's not worth it, the `invoke` method must return a `BlahResult` object
     of the proper type, its a mess
-- [ ] Wrap the template and prompts in a `BlahPrompt` class
-    Which makes it easier to change them for locale or difficulty
-- [ ] Add more conversation samples in different languages and for different levels of understanding
-- [ ] Add test coverage report
-- [ ] Change the name of all `convert_to_secret_str` to `v1`
 
 ### Web App
 
+- [ ] Add getters and setters for weird app/conversation/words attributes
 - [x] Show the written turn as you select the options
-- [ ] Pass the app to all the components
+- [x] Pass the app to all the components
+- [ ] Show an indicator of the current turn out of the total turns
 - [ ] Do not pass the language to the conversation
 - [ ] Add option to toggle showing the original as a hint in the sidebar
-- [ ] Add getters and setters for weird app/conversation/words attributes
 - [ ] Reset the conversation at the end of the conversation
     - [ ] Add an option to continue instead
 - [x] Develop the user input step
