@@ -14,6 +14,8 @@ class ParagraphSplitterResult(BaseModel):
     such that the concatenation of the portions should be equal to the original paragraph.
 
     Prefer splitting the paragraph into meaningful portions, such as phrases or clauses.
+    Avoid splitting on commas, unless the sentence is longer than 15 words.
+    Avoid generating a single word as a portion.
     """
 
     portions: list[str] = Field(description="The split paragraph.")
