@@ -153,12 +153,12 @@ def show_options() -> None:
         cols = cycle(st.columns(6))
         for wi, word in enumerate(sentence):
             col = next(cols)
-            part = partial(option_index_cb, si, wi)
             col.button(
                 word.word,
-                on_click=part,
+                on_click=option_index_cb,
                 **options_dict[word.state],
                 key=f"button_options_{si}_{wi}",
+                args=(si, wi),
             )
 
 

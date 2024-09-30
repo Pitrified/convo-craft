@@ -44,6 +44,17 @@ def setup_bank() -> None:
             on_click=part,
         )
 
+    st.write("Button bank `kwargs`:")
+    cols = cycle(st.columns(4))
+    for i, word in enumerate(ss.words):
+        col = next(cols)
+        col.button(
+            f"{i}: {word}",
+            key=f"button_{i}_kwargs",
+            on_click=button_with_index,
+            args=(word, i),
+        )
+
 
 def button_with_index(word: str, i: int) -> None:
     """Create a button with an index."""
