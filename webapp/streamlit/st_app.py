@@ -17,9 +17,9 @@ def setup_app() -> None:
     st.set_page_config(page_title="Convo Craft", page_icon="🗣️")
     st.sidebar.title("Convo Craft")
 
-    load_api_key()
-
     init_app_state()
+
+    load_api_key()
 
 
 def init_app_state() -> None:
@@ -38,12 +38,17 @@ def load_api_key() -> None:
         type="password",
         on_change=load_api_key_cb,
     )
+    a = get_app()
+    if a.openai_api_key_is_set is False:
+        st.write("Please enter the API key")
+        st.stop()
 
 
 def load_api_key_cb() -> None:
     """Load the API key callback."""
     lg.info("Loading the API key")
-    os.environ["OPENAI_API_KEY"] = ss.api_key
+    a = get_app()
+    a.set_openai_api_key(ss.api_key)
 
 
 def get_app() -> App:
@@ -105,6 +110,7 @@ def show_done_conv() -> None:
     a: App = ss.app
     ac = a.conversation
     st.subheader("Conversation")
+    # TODO should be a getter : get_done_conversation_content
     for it, turn in enumerate(ac.conversation):
         if it >= ac.conversation_step:
             break

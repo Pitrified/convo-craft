@@ -5,6 +5,7 @@ import random
 
 from loguru import logger as lg
 
+from convo_craft.config.chat_openai import ChatOpenAIConfig
 from convo_craft.llm.conversation_generator import (
     CONVERSATION_SAMPLE,
     TOPIC_SAMPLE,
@@ -15,6 +16,7 @@ from convo_craft.llm.paragraph_splitter import ParagraphSplitter
 from convo_craft.llm.topic_picker import OLD_TOPICS, TopicsPicker
 from convo_craft.llm.translator import Translator
 from convo_craft.text.split_sentence import SentenceSplitter
+from convo_craft.utils.u_pydantic import convert_to_secret_str_v2
 
 LANGUAGE_OPTIONS = ["Brazilian Portuguese"]
 
@@ -22,7 +24,13 @@ LANGUAGE_OPTIONS = ["Brazilian Portuguese"]
 class AppLanguage:
     """Language picker for the app."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        app: "App",
+    ) -> None:
+        # save reference to the app
+        self.app = app
+        # setup the language options
         self.language_options = LANGUAGE_OPTIONS
         self.set_language_index(0)
 
@@ -35,9 +43,18 @@ class AppLanguage:
 class AppTopic:
     """Topic picker for the app."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        app: "App",
+        understanding_level="intermediate",
+    ) -> None:
+        # save reference to the app
+        self.app = app
         # setup tools
-        self.tp = TopicsPicker(understanding_level="intermediate")
+        self.tp = TopicsPicker(
+            chat_openai_config=self.app.struct_llm_config,
+            understanding_level=understanding_level,
+        )
         # init the topic
         self.topic = ""
         self.topic_index = None
@@ -47,10 +64,7 @@ class AppTopic:
     def generate_topics(self) -> None:
         """Generate topics."""
         lg.info("Generating topics")
-        tp = TopicsPicker(
-            understanding_level="intermediate",
-        )
-        res = tp.invoke(OLD_TOPICS)
+        res = self.tp.invoke(OLD_TOPICS)
         self.set_topics(res.topics)
 
     def set_topics(self, topics: list[str]) -> None:
@@ -78,13 +92,14 @@ class AppConversation:
 
     def __init__(
         self,
-        topic: str,
-        language: AppLanguage,
+        app: "App",
     ) -> None:
         """Initialize the conversation picker."""
+        # save reference to the app
+        self.app = app
         # setup configuration
-        self.topic = topic
-        self.language = language
+        self.topic = self.app.topic.topic
+        self.language = self.app.language
         # setup tools
         self.setup_tools()
         # generate the conversation
@@ -94,6 +109,7 @@ class AppConversation:
 
     def setup_tools(self) -> None:
         self.cg = ConversationGenerator(
+            chat_openai_config=self.app.struct_llm_config,
             language=self.language.language,
             num_messages=5,
             num_sentences=3,
@@ -102,6 +118,7 @@ class AppConversation:
             topic_sample=TOPIC_SAMPLE,
         )
         self.translator = Translator(
+            chat_openai_config=self.app.struct_llm_config,
             source_language=self.language.language,
             target_language="English",
         )
@@ -120,7 +137,7 @@ class AppConversation:
         self.conversation_step = conversation_step
         current_step = self.conversation[self.conversation_step].content
         self.current_step_translation = self.translator.invoke(current_step)
-        self.words = AppWords(current_step)
+        self.words = AppWords(app=self.app, current_step=current_step)
 
     def next_conversation_step(self) -> None:
         """Go to the next conversation step."""
@@ -146,10 +163,18 @@ class AppWordGuess:
 class AppWords:
     """The words related to the current step in the conversation."""
 
-    def __init__(self, current_step: str) -> None:
+    def __init__(
+        self,
+        app: "App",
+        current_step: str,
+    ) -> None:
         """Initialize the app words."""
+        # save reference to the app
+        self.app = app
         # setup tools
-        self.para_splitter = ParagraphSplitter()
+        self.para_splitter = ParagraphSplitter(
+            chat_openai_config=self.app.struct_llm_config,
+        )
         self.sent_splitter = SentenceSplitter()
         # split the paragraph into sentences and words
         self.paragraph = current_step
@@ -212,24 +237,37 @@ class App:
 
     def __init__(self) -> None:
         """Initialize the app."""
+        self.reset_openai_api_key()
         self.reset_language()
+
+    def reset_openai_api_key(self) -> None:
+        """Reset the OpenAI API key."""
+        self.openai_api_key = convert_to_secret_str_v2("not set")
+        self.openai_api_key_is_set = False
+
+    def set_openai_api_key(self, openai_api_key: str) -> None:
+        """Set the OpenAI API key."""
+        self.openai_api_key = convert_to_secret_str_v2(openai_api_key)
+        self.openai_api_key_is_set = True
+        self.set_llm_config()
         self.reset_topic()
+
+    def set_llm_config(self) -> None:
+        """Set the LLM config."""
+        self.struct_llm_config = ChatOpenAIConfig(api_key=self.openai_api_key)
 
     def reset_language(self) -> None:
         """Reset the language."""
-        self.language = AppLanguage()
+        self.language = AppLanguage(self)
 
     def reset_topic(self) -> None:
         """Reset the topic."""
-        self.topic = AppTopic()
+        self.topic = AppTopic(self)
 
     def set_topic_by_value(self, topic: str) -> None:
         """Set the topic."""
         self.topic.set_topic_by_value(topic)
-        self.conversation = AppConversation(
-            topic=self.topic.topic,
-            language=self.language,
-        )
+        self.conversation = AppConversation(app=self)
 
     def receive_guess(self, shuf_si: int, shuf_wi: int) -> None:
         """Receive a guess."""
