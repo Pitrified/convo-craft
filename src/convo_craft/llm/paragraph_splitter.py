@@ -6,6 +6,8 @@ from langchain_core.prompts import ChatPromptTemplate, HumanMessagePromptTemplat
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
+from convo_craft.config.chat_openai import ChatOpenAIConfig
+
 
 class ParagraphSplitterResult(BaseModel):
     """The result of splitting a paragraph.
@@ -34,9 +36,11 @@ split_paragraph_prompt = ChatPromptTemplate(
 class ParagraphSplitter:
     """A paragraph splitter."""
 
+    chat_openai_config: ChatOpenAIConfig
+
     def __post_init__(self):
         """Initialize the paragraph splitter."""
-        self.model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+        self.model = ChatOpenAI(**self.chat_openai_config.model_dump())
         self.structured_llm = self.model.with_structured_output(ParagraphSplitterResult)
 
     def invoke(self, paragraph: str) -> ParagraphSplitterResult:

@@ -6,6 +6,8 @@ from langchain_core.prompts import ChatPromptTemplate, HumanMessagePromptTemplat
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
+from convo_craft.config.chat_openai import ChatOpenAIConfig
+
 
 class TranslatorResult(BaseModel):
     """The result of a translation."""
@@ -26,12 +28,13 @@ translation_prompt = ChatPromptTemplate(
 class Translator:
     """A translator."""
 
+    chat_openai_config: ChatOpenAIConfig
     source_language: str
     target_language: str
 
     def __post_init__(self):
         """Initialize the translator."""
-        self.model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+        self.model = ChatOpenAI(**self.chat_openai_config.model_dump())
         self.structured_llm = self.model.with_structured_output(TranslatorResult)
 
     def invoke(self, source_text: str) -> TranslatorResult:

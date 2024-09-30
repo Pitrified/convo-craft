@@ -7,6 +7,8 @@ from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTempla
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
+from convo_craft.config.chat_openai import ChatOpenAIConfig
+
 
 class TopicsPickerResult(BaseModel):
     """Options for new topics for a conversation.
@@ -44,11 +46,12 @@ OLD_TOPICS = [
 class TopicsPicker:
     """A topic picker."""
 
+    chat_openai_config: ChatOpenAIConfig
     understanding_level: str
 
     def __post_init__(self):
         """Initialize the topic picker."""
-        self.model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+        self.model = ChatOpenAI(**self.chat_openai_config.model_dump())
         self.structured_llm = self.model.with_structured_output(TopicsPickerResult)
 
     def invoke(self, old_topics: list[str]) -> TopicsPickerResult:

@@ -8,6 +8,8 @@ from langchain_openai import ChatOpenAI
 from loguru import logger as lg
 from pydantic import BaseModel, Field
 
+from convo_craft.config.chat_openai import ChatOpenAIConfig
+
 
 class ConversationRole(Enum):
     """The role of the speaker."""
@@ -71,6 +73,7 @@ Sim, eles têm algumas opções de cervejas artesanais. Vou perguntar ao garçom
 class ConversationGenerator:
     """Generate a conversation."""
 
+    chat_openai_config: ChatOpenAIConfig
     language: str
     num_messages: int
     num_sentences: int
@@ -79,7 +82,7 @@ class ConversationGenerator:
     conversation_sample: str
 
     def __post_init__(self) -> None:
-        self.model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+        self.model = ChatOpenAI(**self.chat_openai_config.model_dump())
         self.structured_llm = self.model.with_structured_output(
             ConversationGeneratorResult
         )
