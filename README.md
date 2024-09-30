@@ -75,17 +75,21 @@ streamlit run webapp/streamlit/st_app.py
     Which makes it easier to change them for locale or difficulty
 - [ ] Add more conversation samples in different languages and for different levels of understanding
 - [ ] Add test coverage report
+- [ ] Change the name of all `convert_to_secret_str` to `v1`
 
 ### Web App
 
-- [ ] Show the written turn as you select the options
+- [x] Show the written turn as you select the options
+- [ ] Pass the app to all the components
+- [ ] Do not pass the language to the conversation
 - [ ] Add option to toggle showing the original as a hint in the sidebar
 - [ ] Add getters and setters for weird app/conversation/words attributes
 - [ ] Reset the conversation at the end of the conversation
     - [ ] Add an option to continue instead
-- [ ] Develop the user input step
-- [ ] Add a field to input the `OPENAI_API_KEY`
+- [x] Develop the user input step
+- [x] Add a field to input the `OPENAI_API_KEY`
 - [ ] Add a `Difficulty` picker to the web app
 - [ ] Add a `Language` picker to the web app
 - [ ] Add a `Topic` picker to the web app
+    - [ ] Fancier generator
 - [ ] Count points for each correct answer
