@@ -146,10 +146,13 @@ def show_options() -> None:
         },
     }
     # for key in options_dict: st.button(key, **options_dict[key])
-    st.subheader("Options")
+    # st.subheader("Options")
     a: App = ss.app
     w = a.conversation.words
     for si, sentence in enumerate(w.words_shuffled):
+        # only show the current sentence
+        if si != w.current_sent:
+            continue
         cols = cycle(st.columns(6))
         for wi, word in enumerate(sentence):
             col = next(cols)
@@ -160,6 +163,7 @@ def show_options() -> None:
                 key=f"button_options_{si}_{wi}",
                 args=(si, wi),
             )
+        st.divider()
 
 
 def option_index_cb(sentence: int, word: int) -> None:
