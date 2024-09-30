@@ -40,7 +40,7 @@ def load_api_key() -> None:
     )
     a = get_app()
     if a.openai_api_key_is_set is False:
-        st.write("Please enter the API key")
+        st.write("Please enter the API key (open the sidebar)")
         st.stop()
 
 
@@ -66,7 +66,7 @@ def setup_language() -> None:
 
 def setup_topics() -> None:
     """Set up the topics."""
-    st.sidebar.subheader("Topics")
+    st.subheader("Pick a topic")
     choose_topic()
 
 
@@ -75,7 +75,7 @@ def choose_topic() -> None:
     a: App = ss.app
     at = a.topic
     # lg.debug(f'current topic index: "{at.topic_index}"')
-    st.sidebar.selectbox(
+    st.selectbox(
         "Choose a topic",
         at.topics,
         key="topic",
@@ -121,7 +121,7 @@ def show_current_turn() -> None:
     """Show the current turn."""
     a: App = ss.app
     ac = a.conversation
-    st.subheader("Next sentence")
+    st.write("##### Translate the next sentence:")
     st.write(ac.current_step_translation.target_text)
     st.write(ac.words.sent_guessed)
     # st.write(ac.conversation[ac.conversation_step].content)
