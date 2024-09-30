@@ -98,6 +98,7 @@ def show_current_turn() -> None:
     ac = a.conversation
     st.subheader("Next sentence")
     st.write(ac.current_step_translation.target_text)
+    st.write(ac.words.sent_guessed)
     # st.write(ac.conversation[ac.conversation_step].content)
 
 

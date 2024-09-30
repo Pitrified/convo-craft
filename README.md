@@ -80,6 +80,7 @@ streamlit run webapp/streamlit/st_app.py
 
 - [ ] Show the written turn as you select the options
 - [ ] Add option to toggle showing the original as a hint in the sidebar
+- [ ] Add getters and setters for weird app/conversation/words attributes
 - [ ] Reset the conversation at the end of the conversation
     - [ ] Add an option to continue instead
 - [ ] Develop the user input step

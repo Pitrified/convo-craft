@@ -167,6 +167,8 @@ class AppWords:
         self.shuffle_words()
         # set the done flag
         self.done = False
+        # accumulate the correct words as they are guessed
+        self.sent_guessed = ""
 
     def shuffle_words(self) -> None:
         """Shuffle the words."""
@@ -199,6 +201,8 @@ class AppWords:
         if self.current_sent == len(self.sents_words):
             lg.success("All words guessed correctly")
             self.done = True
+        # add the word to the guessed sentence
+        self.sent_guessed += f"{guess.word} "
         lg.debug(f"Right guess: {guess} == {current_word}")
         return True
 
